@@ -103,7 +103,8 @@ export default function AdminRatings({
     }));
   }
 
- async function saveAll() {
+ 
+  async function saveAll() {
   if (!selectedChampion) {
     setMessage('Selecciona un campeón primero');
     return;
@@ -118,59 +119,40 @@ export default function AdminRatings({
 
       if (!item) continue;
 
-      // 🔴 Si rating = 0 → BORRAR
-      if (item.rating === 0) {
-        if (item.id) {
-          const res = await fetch(`/api/admin-ratings`, {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: item.id }),
-          });
+      const res = await fetch(`/api/admin-ratings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          champion_id: Number(selectedChampion),
+          zone_id: zone.id,
+          rating: item.rating,
+          notes: item.notes,
+        }),
+      });
 
-          if (!res.ok) {
-            throw new Error('Error borrando valoración');
-          }
-        }
-
-        continue;
-      }
-
-      // 🟡 Si existe → UPDATE
-      if (item.id) {
-        const res = await fetch(`/api/admin-ratings`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            champion_id: Number(selectedChampion),
-            zone_id: zone.id,
-            rating: item.rating,
-            notes: item.notes,
-          }),
-        });
-
-        if (!res.ok) {
-          throw new Error('Error actualizando valoración');
-        }
-      } else {
-        // 🟢 Si no existe → CREATE
-        const res = await fetch(`/api/admin-ratings`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            champion_id: Number(selectedChampion),
-            zone_id: zone.id,
-            rating: item.rating,
-            notes: item.notes,
-          }),
-        });
-
-        if (!res.ok) {
-          throw new Error('Error creando valoración');
-        }
+      if (!res.ok) {
+        throw new Error('Error guardando una valoración');
       }
     }
 
     setMessage('Valoraciones guardadas correctamente');
+
+    // Recargamos valoraciones para limpiar las borradas
+    const res = await fetch(`/api/admin-ratings?champion=${selectedChampion}`);
+    const json = await res.json();
+    const items = Array.isArray(json?.data) ? json.data : [];
+
+    const mapped: Record<number, { id?: number; rating: number; notes: string }> = {};
+
+    for (const item of items) {
+      mapped[item.zone_id] = {
+        id: item.id,
+        rating: Number(item.rating || 0),
+        notes: item.notes || '',
+      };
+    }
+
+    setRatings(mapped);
   } catch (error) {
     setMessage('Error guardando valoraciones');
   } finally {

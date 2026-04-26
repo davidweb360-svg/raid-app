@@ -23,10 +23,7 @@ export async function GET(request: Request) {
 
   if (error) {
     console.error(error);
-    return Response.json(
-      { error: 'Error cargando valoraciones' },
-      { status: 500 }
-    );
+    return Response.json({ error: 'Error cargando valoraciones' }, { status: 500 });
   }
 
   return Response.json({ data: data || [] });
@@ -39,6 +36,22 @@ export async function POST(request: Request) {
 
   if (!champion_id || !zone_id) {
     return Response.json({ error: 'Faltan datos' }, { status: 400 });
+  }
+
+  // Si rating es 0, borramos la valoración
+  if (Number(rating) === 0) {
+    const { error } = await supabase
+      .from('zone_ratings')
+      .delete()
+      .eq('champion_id', Number(champion_id))
+      .eq('zone_id', Number(zone_id));
+
+    if (error) {
+      console.error(error);
+      return Response.json({ error: 'Error borrando valoración' }, { status: 500 });
+    }
+
+    return Response.json({ success: true, deleted: true });
   }
 
   const { data, error } = await supabase
@@ -58,35 +71,8 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error(error);
-    return Response.json(
-      { error: 'Error guardando valoración' },
-      { status: 500 }
-    );
+    return Response.json({ error: 'Error guardando valoración' }, { status: 500 });
   }
 
   return Response.json({ data });
-}
-
-export async function DELETE(request: Request) {
-  const body = await request.json();
-  const { id } = body;
-
-  if (!id) {
-    return Response.json({ error: 'Falta id' }, { status: 400 });
-  }
-
-  const { error } = await supabase
-    .from('zone_ratings')
-    .delete()
-    .eq('id', Number(id));
-
-  if (error) {
-    console.error(error);
-    return Response.json(
-      { error: 'Error borrando valoración' },
-      { status: 500 }
-    );
-  }
-
-  return Response.json({ success: true });
 }
