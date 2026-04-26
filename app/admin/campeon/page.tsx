@@ -1,8 +1,9 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { supabase } from '@/lib/supabase';
 import AdminChampionStatus from '@/app/components/AdminChampionStatus';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+
 
 async function getChampions() {
   const { data, error } = await supabase

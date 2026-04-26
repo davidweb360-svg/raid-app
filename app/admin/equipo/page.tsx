@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { supabase } from '@/lib/supabase';
 import AdminEquipment from '@/app/components/AdminEquipment';
 

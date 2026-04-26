@@ -1,10 +1,10 @@
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import ChampionStars from '@/app/components/ChampionStars';
 import { supabase } from '@/lib/supabase';
 import ChampionTabs from '@/app/components/ChampionTabs';
 import IdealEquipment from '@/app/components/IdealEquipment';
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 async function getChampion(slug: string) {
   const { data, error } = await supabase
