@@ -16,11 +16,18 @@ export async function POST(request: Request) {
   }
 
   if (password !== adminPassword) {
-    return NextResponse.redirect(new URL('/login-admin?error=1', request.url));
+    return NextResponse.redirect(
+      new URL('/login-admin?error=1', request.url),
+      303
+    );
   }
 
   const safeNext = next.startsWith('/admin') ? next : '/admin';
-  const response = NextResponse.redirect(new URL(safeNext, request.url));
+
+  const response = NextResponse.redirect(
+    new URL(safeNext, request.url),
+    303
+  );
 
   response.cookies.set('raid_admin_auth', 'true', {
     httpOnly: true,
