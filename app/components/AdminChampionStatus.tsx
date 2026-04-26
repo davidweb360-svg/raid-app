@@ -7,13 +7,25 @@ type Champion = {
   name: string;
 };
 
-const STAR_OPTIONS = [0, 4, 5, 6];
-
-const COLOR_OPTIONS = [
-  { value: 'yellow', label: 'Amarillas' },
-  { value: 'purple', label: 'Moradas / rosas' },
-  { value: 'red', label: 'Rojas' },
+const STAR_OPTIONS = [
+  { value: 'empty', label: 'Vacía', symbol: '☆', className: 'text-white/30' },
+  { value: 'yellow', label: 'Amarilla', symbol: '★', className: 'text-amber-300' },
+  { value: 'purple', label: 'Morada / rosa', symbol: '★', className: 'text-fuchsia-400' },
+  { value: 'red', label: 'Roja', symbol: '★', className: 'text-red-500' },
 ];
+
+function normalizeSlots(value: any): string[] {
+  if (!Array.isArray(value)) return ['empty', 'empty', 'empty', 'empty', 'empty', 'empty'];
+
+  const cleaned = value.slice(0, 6).map((item) => {
+    if (['yellow', 'purple', 'red', 'empty'].includes(item)) return item;
+    return 'empty';
+  });
+
+  while (cleaned.length < 6) cleaned.push('empty');
+
+  return cleaned;
+}
 
 export default function AdminChampionStatus({
   champions,
@@ -23,8 +35,7 @@ export default function AdminChampionStatus({
   const [selectedChampion, setSelectedChampion] = useState('');
   const [search, setSearch] = useState('');
   const [owned, setOwned] = useState(false);
-  const [stars, setStars] = useState(0);
-  const [color, setColor] = useState('yellow');
+  const [starSlots, setStarSlots] = useState<string[]>(normalizeSlots([]));
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState('');
@@ -56,8 +67,7 @@ export default function AdminChampionStatus({
         const champ = json?.data;
 
         setOwned(Boolean(champ?.owned));
-        setStars(Number(champ?.champion_stars || 0));
-        setColor(champ?.champion_star_color || 'yellow');
+        setStarSlots(normalizeSlots(champ?.champion_star_slots));
       } catch {
         setMessage('Error cargando campeón');
       } finally {
@@ -67,6 +77,14 @@ export default function AdminChampionStatus({
 
     loadChampion();
   }, [selectedChampion]);
+
+  function updateSlot(index: number, value: string) {
+    setStarSlots((prev) => {
+      const next = [...prev];
+      next[index] = value;
+      return next;
+    });
+  }
 
   async function saveChampion() {
     if (!selectedChampion) {
@@ -84,8 +102,7 @@ export default function AdminChampionStatus({
         body: JSON.stringify({
           id: Number(selectedChampion),
           owned,
-          champion_stars: stars,
-          champion_star_color: color,
+          champion_star_slots: starSlots,
         }),
       });
 
@@ -142,50 +159,53 @@ export default function AdminChampionStatus({
 
       {!!selectedChampion && !loading ? (
         <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
-          <div className="grid gap-6 md:grid-cols-3">
-            <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 p-4 text-white/80">
-              <input
-                type="checkbox"
-                checked={owned}
-                onChange={(e) => setOwned(e.target.checked)}
-                className="h-5 w-5"
-              />
-              Lo tiene
-            </label>
+          <label className="mb-6 flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 p-4 text-white/80">
+            <input
+              type="checkbox"
+              checked={owned}
+              onChange={(e) => setOwned(e.target.checked)}
+              className="h-5 w-5"
+            />
+            Lo tiene
+          </label>
 
-            <div>
-              <label className="mb-2 block text-sm text-white/55">
-                Estrellas
-              </label>
-              <select
-                value={stars}
-                onChange={(e) => setStars(Number(e.target.value))}
-                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none"
-              >
-                {STAR_OPTIONS.map((option) => (
-                  <option key={option} value={option}>
-                    {option === 0 ? 'Sin indicar' : `${option} estrellas`}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <h2 className="mb-4 text-2xl font-bold">Estrellas del campeón</h2>
 
-            <div>
-              <label className="mb-2 block text-sm text-white/55">
-                Color
-              </label>
-              <select
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none"
+          <div className="mb-6 flex flex-wrap gap-2 text-4xl">
+            {starSlots.map((slot, index) => {
+              const option = STAR_OPTIONS.find((item) => item.value === slot) || STAR_OPTIONS[0];
+
+              return (
+                <span key={index} className={option.className}>
+                  {option.symbol}
+                </span>
+              );
+            })}
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {starSlots.map((slot, index) => (
+              <div
+                key={index}
+                className="rounded-2xl border border-white/10 bg-black/30 p-4"
               >
-                {COLOR_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <label className="mb-2 block text-sm text-white/55">
+                  Estrella {index + 1}
+                </label>
+
+                <select
+                  value={slot}
+                  onChange={(e) => updateSlot(index, e.target.value)}
+                  className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none"
+                >
+                  {STAR_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
           </div>
 
           <button

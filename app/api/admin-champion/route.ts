@@ -15,7 +15,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from('champions')
-    .select('id,name,owned,champion_stars,champion_star_color')
+    .select('id,name,owned,champion_star_slots')
     .eq('id', Number(championId))
     .single();
 
@@ -29,7 +29,7 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   const body = await request.json();
-  const { id, owned, champion_stars, champion_star_color } = body;
+  const { id, owned, champion_star_slots } = body;
 
   if (!id) {
     return Response.json({ error: 'Falta id' }, { status: 400 });
@@ -39,8 +39,7 @@ export async function PATCH(request: Request) {
     .from('champions')
     .update({
       owned,
-      champion_stars,
-      champion_star_color,
+      champion_star_slots,
     })
     .eq('id', Number(id))
     .select();
