@@ -1,4 +1,9 @@
-const DIRECTUS_URL = 'http://127.0.0.1:8055';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -8,45 +13,38 @@ export async function GET(request: Request) {
     return Response.json({ data: null });
   }
 
-  try {
-    const res = await fetch(
-      `${DIRECTUS_URL}/items/champions/${championId}?fields=id,name,ideal_equipment`,
-      { cache: 'no-store' }
-    );
+  const { data, error } = await supabase
+    .from('champions')
+    .select('id,name,ideal_equipment')
+    .eq('id', Number(championId))
+    .single();
 
-    const text = await res.text();
-
-    return new Response(text, {
-      status: res.status,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
+  if (error) {
+    console.error(error);
     return Response.json({ error: 'Error cargando equipo ideal' }, { status: 500 });
   }
+
+  return Response.json({ data });
 }
 
 export async function PATCH(request: Request) {
-  try {
-    const body = await request.json();
-    const { id, ideal_equipment } = body;
+  const body = await request.json();
+  const { id, ideal_equipment } = body;
 
-    if (!id) {
-      return Response.json({ error: 'Falta id' }, { status: 400 });
-    }
+  if (!id) {
+    return Response.json({ error: 'Falta id' }, { status: 400 });
+  }
 
-    const res = await fetch(`${DIRECTUS_URL}/items/champions/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ideal_equipment }),
-    });
+  const { data, error } = await supabase
+    .from('champions')
+    .update({ ideal_equipment })
+    .eq('id', Number(id))
+    .select();
 
-    const text = await res.text();
-
-    return new Response(text, {
-      status: res.status,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
+  if (error) {
+    console.error(error);
     return Response.json({ error: 'Error guardando equipo ideal' }, { status: 500 });
   }
+
+  return Response.json({ data });
 }

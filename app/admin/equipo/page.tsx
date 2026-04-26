@@ -1,11 +1,18 @@
+import { supabase } from '@/lib/supabase';
 import AdminEquipment from '@/app/components/AdminEquipment';
 
 async function getChampions() {
-  const res = await fetch('http://127.0.0.1:8055/items/champions?limit=1000&sort=name', {
-    cache: 'no-store',
-  });
-  const json = await res.json();
-  return json?.data || [];
+  const { data, error } = await supabase
+    .from('champions')
+    .select('id,name')
+    .order('name', { ascending: true });
+
+  if (error) {
+    console.error('Error cargando campeones:', error);
+    return [];
+  }
+
+  return data || [];
 }
 
 export default async function AdminEquipmentPage() {
@@ -24,7 +31,10 @@ export default async function AdminEquipmentPage() {
         <p className="text-sm uppercase tracking-[0.3em] text-amber-400/80">
           Panel rápido
         </p>
-        <h1 className="mb-8 mt-2 text-5xl font-bold">Equipo ideal por campeón</h1>
+
+        <h1 className="mb-8 mt-2 text-5xl font-bold">
+          Equipo ideal por campeón
+        </h1>
 
         <AdminEquipment champions={champions} />
       </div>
