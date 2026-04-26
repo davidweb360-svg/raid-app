@@ -3,10 +3,10 @@ import { NextResponse } from 'next/server';
 export async function POST(request: Request) {
   const formData = await request.formData();
 
-  const password = String(formData.get('password') || '');
+  const password = String(formData.get('password') || '').trim();
   const next = String(formData.get('next') || '/admin');
 
-  const adminPassword = process.env.ADMIN_PASSWORD;
+  const adminPassword = process.env.ADMIN_PASSWORD?.trim();
 
   if (!adminPassword) {
     return NextResponse.json(
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   response.cookies.set('raid_admin_auth', 'true', {
     httpOnly: true,
     sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    secure: true,
     path: '/',
     maxAge: 60 * 60 * 24 * 30,
   });
