@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
@@ -22,7 +23,10 @@ export async function GET(request: Request) {
 
   if (error) {
     console.error(error);
-    return Response.json({ error: 'Error cargando valoraciones' }, { status: 500 });
+    return Response.json(
+      { error: 'Error cargando valoraciones' },
+      { status: 500 }
+    );
   }
 
   return Response.json({ data: data || [] });
@@ -54,8 +58,35 @@ export async function POST(request: Request) {
 
   if (error) {
     console.error(error);
-    return Response.json({ error: 'Error guardando valoración' }, { status: 500 });
+    return Response.json(
+      { error: 'Error guardando valoración' },
+      { status: 500 }
+    );
   }
 
   return Response.json({ data });
+}
+
+export async function DELETE(request: Request) {
+  const body = await request.json();
+  const { id } = body;
+
+  if (!id) {
+    return Response.json({ error: 'Falta id' }, { status: 400 });
+  }
+
+  const { error } = await supabase
+    .from('zone_ratings')
+    .delete()
+    .eq('id', Number(id));
+
+  if (error) {
+    console.error(error);
+    return Response.json(
+      { error: 'Error borrando valoración' },
+      { status: 500 }
+    );
+  }
+
+  return Response.json({ success: true });
 }
