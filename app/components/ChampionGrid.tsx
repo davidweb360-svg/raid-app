@@ -1,6 +1,6 @@
-import ChampionStars from './ChampionStars';
 'use client';
 
+import ChampionStars from './ChampionStars';
 import { useMemo, useState } from 'react';
 
 export default function ChampionGrid({ champions }: { champions: any[] }) {
