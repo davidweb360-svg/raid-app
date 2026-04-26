@@ -1,3 +1,4 @@
+import ChampionStars from '@/app/components/ChampionStars';
 import { supabase } from '@/lib/supabase';
 import ChampionTabs from '@/app/components/ChampionTabs';
 import IdealEquipment from '@/app/components/IdealEquipment';

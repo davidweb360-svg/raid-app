@@ -1,3 +1,4 @@
+import ChampionStars from './ChampionStars';
 'use client';
 
 import { useMemo, useState } from 'react';
@@ -135,6 +136,9 @@ export default function ChampionGrid({ champions }: { champions: any[] }) {
               <h2 className="line-clamp-2 text-2xl font-bold">
                 {champ.name}
               </h2>
+              <div className="mt-2">
+  <ChampionStars slots={champ.champion_star_slots} size="sm" />
+</div>
 
               <div className="mt-4 space-y-2 text-sm text-white/75">
                 <p>
