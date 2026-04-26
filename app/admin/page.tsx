@@ -35,6 +35,15 @@ export default async function AdminPage() {
               Puntúa cada campeón por zonas del juego con estrellas de 0 a 5.
             </p>
           </a>
+          <a
+  href="/admin/campeon"
+  className="rounded-3xl border border-white/10 bg-white/5 p-6 transition hover:border-amber-400/30 hover:bg-white/10"
+>
+  <h2 className="text-2xl font-bold">Estado del campeón</h2>
+  <p className="mt-2 text-white/65">
+    Marca si lo tiene y configura sus estrellas: amarillas, moradas o rojas.
+  </p>
+</a>
         </div>
       </div>
     </main>
