@@ -39,15 +39,11 @@ function normalizeEquipment(input: any): EquipmentData {
 
 function getSubstatsText(value?: string[] | string) {
   if (!value) return '';
-  if (Array.isArray(value)) return value.join(' / ');
+  if (Array.isArray(value)) return value.join('\n');
   return value;
 }
 
-export default function IdealEquipment({
-  equipment,
-}: {
-  equipment: any;
-}) {
+export default function IdealEquipment({ equipment }: { equipment: any }) {
   const data = normalizeEquipment(equipment);
 
   return (
@@ -85,7 +81,7 @@ export default function IdealEquipment({
                 </p>
 
                 {substats ? (
-                  <p className="mt-1 text-xs leading-tight text-white/60">
+                  <p className="mt-1 whitespace-pre-line text-xs leading-tight text-white/60">
                     {substats}
                   </p>
                 ) : null}
