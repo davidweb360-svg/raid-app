@@ -103,21 +103,40 @@ export default function AdminRatings({
     }));
   }
 
-  async function saveAll() {
-    if (!selectedChampion) {
-      setMessage('Selecciona un campeón primero');
-      return;
-    }
+ async function saveAll() {
+  if (!selectedChampion) {
+    setMessage('Selecciona un campeón primero');
+    return;
+  }
 
-    setSaving(true);
-    setMessage('');
+  setSaving(true);
+  setMessage('');
 
-    try {
-      for (const zone of zones) {
-        const item = ratings[zone.id];
+  try {
+    for (const zone of zones) {
+      const item = ratings[zone.id];
 
-        if (!item || item.rating === 0) continue;
+      if (!item) continue;
 
+      // 🔴 Si rating = 0 → BORRAR
+      if (item.rating === 0) {
+        if (item.id) {
+          const res = await fetch(`/api/admin-ratings`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: item.id }),
+          });
+
+          if (!res.ok) {
+            throw new Error('Error borrando valoración');
+          }
+        }
+
+        continue;
+      }
+
+      // 🟡 Si existe → UPDATE
+      if (item.id) {
         const res = await fetch(`/api/admin-ratings`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -130,18 +149,34 @@ export default function AdminRatings({
         });
 
         if (!res.ok) {
-          throw new Error('Error guardando una valoración');
+          throw new Error('Error actualizando valoración');
+        }
+      } else {
+        // 🟢 Si no existe → CREATE
+        const res = await fetch(`/api/admin-ratings`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            champion_id: Number(selectedChampion),
+            zone_id: zone.id,
+            rating: item.rating,
+            notes: item.notes,
+          }),
+        });
+
+        if (!res.ok) {
+          throw new Error('Error creando valoración');
         }
       }
-
-      setMessage('Valoraciones guardadas correctamente');
-    } catch (error) {
-      setMessage('Error guardando valoraciones');
-    } finally {
-      setSaving(false);
     }
-  }
 
+    setMessage('Valoraciones guardadas correctamente');
+  } catch (error) {
+    setMessage('Error guardando valoraciones');
+  } finally {
+    setSaving(false);
+  }
+}
   return (
     <div className="space-y-6">
       <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
