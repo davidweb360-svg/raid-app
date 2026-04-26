@@ -1,7 +1,10 @@
+
 import ChampionStars from '@/app/components/ChampionStars';
 import { supabase } from '@/lib/supabase';
 import ChampionTabs from '@/app/components/ChampionTabs';
 import IdealEquipment from '@/app/components/IdealEquipment';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 async function getChampion(slug: string) {
   const { data, error } = await supabase
@@ -132,6 +135,10 @@ export default async function ChampionPage({
                     <h1 className="text-4xl font-black uppercase leading-none text-amber-300 md:text-6xl">
                       {champion.name}
                     </h1>
+                    <div className="mt-2 flex justify-center md:justify-start">
+  <ChampionStars slots={champion.champion_star_slots} size="lg" />
+</div>
+                    <ChampionStars slots={champion.champion_star_slots} size="lg" />
                     {champion.affinity ? (
                       <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-sky-300">
                         {champion.affinity}
