@@ -6,16 +6,26 @@ export async function POST(request: Request) {
   const password = String(formData.get('password') || '');
   const next = String(formData.get('next') || '/admin');
 
-  if (password !== process.env.ADMIN_PASSWORD) {
+  const adminPassword = process.env.ADMIN_PASSWORD;
+
+  if (!adminPassword) {
+    return NextResponse.json(
+      { error: 'ADMIN_PASSWORD no está configurada' },
+      { status: 500 }
+    );
+  }
+
+  if (password !== adminPassword) {
     return NextResponse.redirect(new URL('/login-admin?error=1', request.url));
   }
 
-  const response = NextResponse.redirect(new URL(next, request.url));
+  const safeNext = next.startsWith('/admin') ? next : '/admin';
+  const response = NextResponse.redirect(new URL(safeNext, request.url));
 
   response.cookies.set('raid_admin_auth', 'true', {
     httpOnly: true,
     sameSite: 'lax',
-    secure: true,
+    secure: process.env.NODE_ENV === 'production',
     path: '/',
     maxAge: 60 * 60 * 24 * 30,
   });
