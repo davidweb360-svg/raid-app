@@ -132,17 +132,25 @@ export default async function ChampionPage({
               <div className="flex-1 text-center md:text-left">
                 <header className="flex flex-col gap-3">
                   <div className="flex flex-col items-center gap-3 md:flex-row md:items-center">
-                    <h1 className="text-4xl font-black uppercase leading-none text-amber-300 md:text-6xl">
-                      {champion.name}
-                    </h1>
-                    <div className="mt-2 flex justify-center md:justify-start">
+<h1 className="text-4xl font-black uppercase leading-none text-amber-300 md:text-6xl">
+  {champion.name}
+</h1>
+
+<div className="mt-2 flex justify-center md:justify-start">
   <ChampionStars slots={champion.champion_star_slots} size="lg" />
 </div>
-                    {champion.affinity ? (
-                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-sky-300">
-                        {champion.affinity}
-                      </span>
-                    ) : null}
+
+{champion.faction_slug ? (
+  <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-sm text-amber-300">
+    Facción: {champion.faction_slug}
+  </span>
+) : null}
+
+{champion.affinity ? (
+  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-sky-300">
+    {champion.affinity}
+  </span>
+) : null}
                   </div>
 
                   <p className="inline-flex w-fit self-center rounded-full border border-white/10 bg-black/25 px-5 py-2 text-base text-white/85 md:self-start">
