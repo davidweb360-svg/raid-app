@@ -16,6 +16,15 @@ export default async function AdminPage() {
 
         <div className="grid gap-4 md:grid-cols-2">
           <a
+  href="/admin/heroes"
+  className="rounded-3xl border border-white/10 bg-white/5 p-6 transition hover:border-amber-400/30 hover:bg-white/10"
+>
+  <h2 className="text-2xl font-bold">Crear héroe</h2>
+  <p className="mt-2 text-white/65">
+    Añade nuevos campeones con imagen, facción, stats y habilidades.
+  </p>
+</a>
+          <a
             href="/admin/equipo"
             className="rounded-3xl border border-white/10 bg-white/5 p-6 transition hover:border-amber-400/30 hover:bg-white/10"
           >
