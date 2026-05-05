@@ -1,13 +1,38 @@
 'use client';
 
-import ChampionStars from './ChampionStars';
 import { useMemo, useState } from 'react';
+import ChampionStars from './ChampionStars';
+
+const FACTION_LABELS: Record<string, string> = {
+  hidalgos: 'Hidalgos',
+  'altos-elfos': 'Altos Elfos',
+  'orden-sagrada': 'Orden Sagrada',
+  barbaros: 'Bárbaros',
+  ogretes: 'Ogretes',
+  'hombres-lagarto': 'Hombres Lagarto',
+  cambiapieles: 'Cambiapieles',
+  orcos: 'Orcos',
+  engendros: 'Engendros',
+  'no-muertos': 'No Muertos',
+  'elfos-oscuros': 'Elfos Oscuros',
+  aparecidos: 'Aparecidos',
+  enanos: 'Enanos',
+  sombrios: 'Sombríos',
+  'vigias-silvanos': 'Vigías Silvanos',
+  argonitas: 'Argonitas',
+};
+
+function getFactionLabel(slug?: string) {
+  if (!slug) return '—';
+  return FACTION_LABELS[slug] || slug;
+}
 
 export default function ChampionGrid({ champions }: { champions: any[] }) {
   const [search, setSearch] = useState('');
   const [ownedOnly, setOwnedOnly] = useState(false);
   const [rarity, setRarity] = useState('');
   const [affinity, setAffinity] = useState('');
+  const [faction, setFaction] = useState('');
 
   const rarities = useMemo(() => {
     return [...new Set(champions.map((c) => c.rarity).filter(Boolean))].sort();
@@ -17,34 +42,49 @@ export default function ChampionGrid({ champions }: { champions: any[] }) {
     return [...new Set(champions.map((c) => c.affinity).filter(Boolean))].sort();
   }, [champions]);
 
+  const factions = useMemo(() => {
+    return [...new Set(champions.map((c) => c.faction_slug).filter(Boolean))]
+      .sort((a, b) => getFactionLabel(a).localeCompare(getFactionLabel(b)));
+  }, [champions]);
+
   const filteredChampions = useMemo(() => {
     return champions.filter((champ) => {
       const text = search.toLowerCase();
+      const factionLabel = getFactionLabel(champ.faction_slug).toLowerCase();
 
       const matchesSearch =
         !text ||
         champ.name?.toLowerCase().includes(text) ||
         champ.role?.toLowerCase().includes(text) ||
         champ.affinity?.toLowerCase().includes(text) ||
-        champ.rarity?.toLowerCase().includes(text);
+        champ.rarity?.toLowerCase().includes(text) ||
+        champ.faction_slug?.toLowerCase().includes(text) ||
+        factionLabel.includes(text);
 
       const matchesOwned = ownedOnly ? champ.owned === true : true;
       const matchesRarity = rarity ? champ.rarity === rarity : true;
       const matchesAffinity = affinity ? champ.affinity === affinity : true;
+      const matchesFaction = faction ? champ.faction_slug === faction : true;
 
-      return matchesSearch && matchesOwned && matchesRarity && matchesAffinity;
+      return (
+        matchesSearch &&
+        matchesOwned &&
+        matchesRarity &&
+        matchesAffinity &&
+        matchesFaction
+      );
     });
-  }, [champions, search, ownedOnly, rarity, affinity]);
+  }, [champions, search, ownedOnly, rarity, affinity, faction]);
 
   return (
     <>
-      <div className="mb-8 grid gap-4 rounded-3xl border border-white/10 bg-white/[0.04] p-4 lg:grid-cols-4">
+      <div className="mb-8 grid gap-4 rounded-3xl border border-white/10 bg-white/[0.04] p-4 lg:grid-cols-5">
         <input
           type="text"
-          placeholder="Buscar por nombre, rol, afinidad o rareza..."
+          placeholder="Buscar por nombre, facción, rol, afinidad o rareza..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none placeholder:text-white/35"
+          className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none placeholder:text-white/35 lg:col-span-2"
         />
 
         <select
@@ -73,7 +113,20 @@ export default function ChampionGrid({ champions }: { champions: any[] }) {
           ))}
         </select>
 
-        <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/80">
+        <select
+          value={faction}
+          onChange={(e) => setFaction(e.target.value)}
+          className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none"
+        >
+          <option value="">Todas las facciones</option>
+          {factions.map((item) => (
+            <option key={item} value={item}>
+              {getFactionLabel(item)}
+            </option>
+          ))}
+        </select>
+
+        <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white/80 lg:col-span-5">
           <input
             type="checkbox"
             checked={ownedOnly}
@@ -89,13 +142,14 @@ export default function ChampionGrid({ champions }: { champions: any[] }) {
           Mostrando {filteredChampions.length} de {champions.length} campeones
         </span>
 
-        {(search || ownedOnly || rarity || affinity) && (
+        {(search || ownedOnly || rarity || affinity || faction) && (
           <button
             onClick={() => {
               setSearch('');
               setOwnedOnly(false);
               setRarity('');
               setAffinity('');
+              setFaction('');
             }}
             className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-white/80 hover:bg-white/10"
           >
@@ -125,10 +179,16 @@ export default function ChampionGrid({ champions }: { champions: any[] }) {
 
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
 
-              <div className="absolute bottom-4 left-4 right-4">
+              <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-2">
                 <span className="inline-block rounded-full border border-amber-400/30 bg-black/50 px-3 py-1 text-xs font-medium uppercase tracking-wide text-amber-300">
                   {champ.rarity || 'Sin rareza'}
                 </span>
+
+                {champ.faction_slug ? (
+                  <span className="inline-block rounded-full border border-white/10 bg-black/50 px-3 py-1 text-xs font-medium text-white/80">
+                    {getFactionLabel(champ.faction_slug)}
+                  </span>
+                ) : null}
               </div>
             </div>
 
@@ -136,15 +196,22 @@ export default function ChampionGrid({ champions }: { champions: any[] }) {
               <h2 className="line-clamp-2 text-2xl font-bold">
                 {champ.name}
               </h2>
+
               <div className="mt-2">
-  <ChampionStars slots={champ.champion_star_slots} size="sm" />
-</div>
+                <ChampionStars slots={champ.champion_star_slots} size="sm" />
+              </div>
 
               <div className="mt-4 space-y-2 text-sm text-white/75">
+                <p>
+                  <span className="text-white/45">Facción:</span>{' '}
+                  {getFactionLabel(champ.faction_slug)}
+                </p>
+
                 <p>
                   <span className="text-white/45">Afinidad:</span>{' '}
                   {champ.affinity || '—'}
                 </p>
+
                 <p>
                   <span className="text-white/45">Rol:</span>{' '}
                   {champ.role || '—'}
