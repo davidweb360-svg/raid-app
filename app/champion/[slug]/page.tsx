@@ -138,7 +138,6 @@ export default async function ChampionPage({
                     <div className="mt-2 flex justify-center md:justify-start">
   <ChampionStars slots={champion.champion_star_slots} size="lg" />
 </div>
-                    <ChampionStars slots={champion.champion_star_slots} size="lg" />
                     {champion.affinity ? (
                       <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-sky-300">
                         {champion.affinity}
