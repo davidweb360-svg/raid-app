@@ -1,10 +1,82 @@
-
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
 import ChampionStars from '@/app/components/ChampionStars';
 import { supabase } from '@/lib/supabase';
 import ChampionTabs from '@/app/components/ChampionTabs';
 import IdealEquipment from '@/app/components/IdealEquipment';
+
+const FACTION_DATA: Record<string, { label: string; image: string }> = {
+  hidalgos: {
+    label: 'Hidalgos',
+    image: 'https://lafogataderaid.com/images/facciones/Hidalgos/hidalgos.webp',
+  },
+  'altos-elfos': {
+    label: 'Altos Elfos',
+    image: 'https://lafogataderaid.com/images/facciones/Altos-Elfos/altos-elfos.webp',
+  },
+  'orden-sagrada': {
+    label: 'Orden Sagrada',
+    image: 'https://lafogataderaid.com/images/facciones/Orden-Sagrada/orden-sagrada.webp',
+  },
+  barbaros: {
+    label: 'Bárbaros',
+    image: 'https://lafogataderaid.com/images/facciones/Barbaros/barbaros.webp',
+  },
+  ogretes: {
+    label: 'Ogretes',
+    image: 'https://lafogataderaid.com/images/facciones/Ogretes/ogretes.webp',
+  },
+  'hombres-lagarto': {
+    label: 'Hombres Lagarto',
+    image: 'https://lafogataderaid.com/images/facciones/Hombres-Lagarto/hombres-lagarto.webp',
+  },
+  cambiapieles: {
+    label: 'Cambiapieles',
+    image: 'https://lafogataderaid.com/images/facciones/Cambiapieles/cambiapieles.webp',
+  },
+  orcos: {
+    label: 'Orcos',
+    image: 'https://lafogataderaid.com/images/facciones/Orcos/orcos.webp',
+  },
+  engendros: {
+    label: 'Engendros',
+    image: 'https://lafogataderaid.com/images/facciones/Engendros/engendros.webp',
+  },
+  'no-muertos': {
+    label: 'No Muertos',
+    image: 'https://lafogataderaid.com/images/facciones/No-Muertos/no-muertos.webp',
+  },
+  'elfos-oscuros': {
+    label: 'Elfos Oscuros',
+    image: 'https://lafogataderaid.com/images/facciones/Elfos-Oscuros/elfos-oscuros.webp',
+  },
+  aparecidos: {
+    label: 'Aparecidos',
+    image: 'https://lafogataderaid.com/images/facciones/Aparecidos/aparecidos.webp',
+  },
+  enanos: {
+    label: 'Enanos',
+    image: 'https://lafogataderaid.com/images/facciones/Enanos/enanos.webp',
+  },
+  sombrios: {
+    label: 'Sombríos',
+    image: 'https://lafogataderaid.com/images/facciones/Sombrios/sombrios.webp',
+  },
+  'vigias-silvanos': {
+    label: 'Vigías Silvanos',
+    image: 'https://lafogataderaid.com/images/facciones/Vigias-Silvanos/vigias-silvanos.webp',
+  },
+  argonitas: {
+    label: 'Argonitas',
+    image: 'https://lafogataderaid.com/images/facciones/Argonitas/argonitas.webp',
+  },
+};
+
+function getFactionData(slug?: string) {
+  if (!slug) return null;
+  return FACTION_DATA[slug] || null;
+}
 
 async function getChampion(slug: string) {
   const { data, error } = await supabase
@@ -58,7 +130,14 @@ function normalizeStats(stats: any) {
 
 function renderSimpleList(value: any) {
   if (!value) return <p className="text-white/50">—</p>;
-  if (typeof value === 'object') return <pre className="text-white/80">{JSON.stringify(value, null, 2)}</pre>;
+  if (typeof value === 'object') {
+    return (
+      <pre className="text-white/80">
+        {JSON.stringify(value, null, 2)}
+      </pre>
+    );
+  }
+
   return <p className="text-white/80">{String(value)}</p>;
 }
 
@@ -96,6 +175,7 @@ export default async function ChampionPage({
   const zoneRatings = await getChampionZoneRatings(champion.id);
   const stats = normalizeStats(champion.stats);
   const skills = Array.isArray(champion.skills) ? champion.skills : [];
+  const factionData = getFactionData(champion.faction_slug);
 
   return (
     <main
@@ -112,7 +192,10 @@ export default async function ChampionPage({
       }
     >
       <div className="mx-auto max-w-7xl">
-        <a href="/" className="mb-6 inline-flex rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 hover:bg-white/10">
+        <a
+          href="/"
+          className="mb-6 inline-flex rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80 hover:bg-white/10"
+        >
           ← Volver
         </a>
 
@@ -122,35 +205,51 @@ export default async function ChampionPage({
               <div className="mx-auto flex-shrink-0 md:mx-0">
                 <div className="overflow-hidden rounded-2xl bg-black/30 ring-2 ring-amber-400/40">
                   {champion.image_url ? (
-                    <img src={champion.image_url} alt={champion.name} className="block h-[176px] w-[176px] object-cover" />
+                    <img
+                      src={champion.image_url}
+                      alt={champion.name}
+                      className="block h-[176px] w-[176px] object-cover"
+                    />
                   ) : (
-                    <div className="flex h-[176px] w-[176px] items-center justify-center text-white/40">Sin imagen</div>
+                    <div className="flex h-[176px] w-[176px] items-center justify-center text-white/40">
+                      Sin imagen
+                    </div>
                   )}
                 </div>
               </div>
 
               <div className="flex-1 text-center md:text-left">
                 <header className="flex flex-col gap-3">
-                  <div className="flex flex-col items-center gap-3 md:flex-row md:items-center">
-<h1 className="text-4xl font-black uppercase leading-none text-amber-300 md:text-6xl">
-  {champion.name}
-</h1>
+                  <div className="flex flex-col items-center gap-3 md:items-start">
+                    <div className="flex flex-col items-center gap-3 md:flex-row md:items-center">
+                      <h1 className="text-4xl font-black uppercase leading-none text-amber-300 md:text-6xl">
+                        {champion.name}
+                      </h1>
 
-<div className="mt-2 flex justify-center md:justify-start">
-  <ChampionStars slots={champion.champion_star_slots} size="lg" />
-</div>
+                      {champion.affinity ? (
+                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-sky-300">
+                          {champion.affinity}
+                        </span>
+                      ) : null}
+                    </div>
 
-{champion.faction_slug ? (
-  <span className="rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1 text-sm text-amber-300">
-    Facción: {champion.faction_slug}
-  </span>
-) : null}
+                    <ChampionStars
+                      slots={champion.champion_star_slots}
+                      size="lg"
+                    />
 
-{champion.affinity ? (
-  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-sm text-sky-300">
-    {champion.affinity}
-  </span>
-) : null}
+                    {factionData ? (
+                      <div className="flex items-center gap-2 rounded-full border border-amber-400/20 bg-amber-500/10 px-3 py-1">
+                        <img
+                          src={factionData.image}
+                          alt={factionData.label}
+                          className="h-7 w-7 rounded object-cover"
+                        />
+                        <span className="text-sm text-amber-300">
+                          {factionData.label}
+                        </span>
+                      </div>
+                    ) : null}
                   </div>
 
                   <p className="inline-flex w-fit self-center rounded-full border border-white/10 bg-black/25 px-5 py-2 text-base text-white/85 md:self-start">
@@ -169,9 +268,18 @@ export default async function ChampionPage({
                           : 'text-white';
 
                       return (
-                        <div key={`${stat.key}-${index}`} className="flex items-baseline justify-between rounded-xl border border-white/10 bg-black/25 px-3 py-2">
-                          <span className="text-xs uppercase tracking-wide text-white/45">{stat.label}</span>
-                          <span className={`text-sm font-semibold tabular-nums ${valueClass}`}>{stat.value}</span>
+                        <div
+                          key={`${stat.key}-${index}`}
+                          className="flex items-baseline justify-between rounded-xl border border-white/10 bg-black/25 px-3 py-2"
+                        >
+                          <span className="text-xs uppercase tracking-wide text-white/45">
+                            {stat.label}
+                          </span>
+                          <span
+                            className={`text-sm font-semibold tabular-nums ${valueClass}`}
+                          >
+                            {stat.value}
+                          </span>
                         </div>
                       );
                     })}
@@ -194,24 +302,41 @@ export default async function ChampionPage({
             <div className="flex flex-col gap-6 md:flex-row md:gap-8">
               <div className="flex-1 space-y-4">
                 <section>
-                  <h6 className="mb-1 text-sm font-semibold uppercase tracking-[0.18em] text-white/45">Función</h6>
-                  <p className="text-base text-white/85">{champion.role || '—'}</p>
+                  <h6 className="mb-1 text-sm font-semibold uppercase tracking-[0.18em] text-white/45">
+                    Función
+                  </h6>
+                  <p className="text-base text-white/85">
+                    {champion.role || '—'}
+                  </p>
                 </section>
 
                 <section>
-                  <h6 className="mb-1 text-sm font-semibold uppercase tracking-[0.18em] text-white/45">Usos</h6>
-                  <p className="whitespace-pre-line text-base text-white/80">{champion.uses || '—'}</p>
+                  <h6 className="mb-1 text-sm font-semibold uppercase tracking-[0.18em] text-white/45">
+                    Usos
+                  </h6>
+                  <p className="whitespace-pre-line text-base text-white/80">
+                    {champion.uses || '—'}
+                  </p>
                 </section>
               </div>
 
               <div className="md:w-[340px]">
                 <div className="overflow-hidden rounded-xl bg-black/30 ring-1 ring-white/10">
                   {champion.video_preview ? (
-                    <video className="h-auto w-full" preload="none" autoPlay playsInline muted loop>
+                    <video
+                      className="h-auto w-full"
+                      preload="none"
+                      autoPlay
+                      playsInline
+                      muted
+                      loop
+                    >
                       <source src={champion.video_preview} type="video/mp4" />
                     </video>
                   ) : (
-                    <div className="flex h-[190px] items-center justify-center text-white/40">Sin preview</div>
+                    <div className="flex h-[190px] items-center justify-center text-white/40">
+                      Sin preview
+                    </div>
                   )}
                 </div>
               </div>
@@ -229,26 +354,42 @@ export default async function ChampionPage({
           ) : (
             <div className="grid gap-3 md:grid-cols-2">
               {zoneRatings.map((item: any) => (
-                <div key={item.id} className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3">
+                <div
+                  key={item.id}
+                  className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3"
+                >
                   <div className="flex items-center justify-between gap-4">
-                    <a href={`/zones/${item.zones?.slug}`} className="font-medium text-white hover:text-amber-300">
+                    <a
+                      href={`/zones/${item.zones?.slug}`}
+                      className="font-medium text-white hover:text-amber-300"
+                    >
                       {item.zones?.name || 'Zona'}
                     </a>
 
                     <div className="flex items-center gap-3">
                       {renderStars(item.rating)}
-                      <span className="min-w-[36px] text-right font-semibold text-white/80">{item.rating}</span>
+                      <span className="min-w-[36px] text-right font-semibold text-white/80">
+                        {item.rating}
+                      </span>
                     </div>
                   </div>
 
-                  {item.notes ? <p className="mt-2 text-sm text-white/65">{item.notes}</p> : null}
+                  {item.notes ? (
+                    <p className="mt-2 text-sm text-white/65">
+                      {item.notes}
+                    </p>
+                  ) : null}
                 </div>
               ))}
             </div>
           )}
         </section>
 
-        <ChampionTabs guideText={champion.guide_text} lore={champion.lore} skills={skills} />
+        <ChampionTabs
+          guideText={champion.guide_text}
+          lore={champion.lore}
+          skills={skills}
+        />
 
         <section className="mt-8 grid gap-6 lg:grid-cols-2">
           <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
